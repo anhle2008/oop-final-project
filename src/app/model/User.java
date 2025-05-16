@@ -1,4 +1,4 @@
-package src.model;
+package app.model;
 
 public abstract class User {
     private String userId;

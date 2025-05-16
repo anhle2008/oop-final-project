@@ -1,4 +1,4 @@
-package src.model;
+package app.model;
 
 public class Customer extends User {
     private String userEmail;

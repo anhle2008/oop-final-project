@@ -1,4 +1,4 @@
-package src.model;
+package app.model;
 
 public class Admin extends User {
     public Admin(String userId, String userName, String userPassword, String userRegisterTime, String userRole) {
