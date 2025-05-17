@@ -1,4 +1,6 @@
-package app.model;
+package oop_lab_final_assignment.app.model;
+
+import org.json.JSONObject;
 
 public class Customer extends User {
     private String userEmail;
@@ -17,8 +19,19 @@ public class Customer extends User {
     }
 
     @Override
-    public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+    protected JSONObject toJSONObject()
+    {
+        JSONObject json = super.toJSONObject();
+
+        json.put("user_email", userEmail);
+        json.put("user_mobile", userMobile);
+
+        return json;
+    }
+
+    @Override
+    public String toString()
+    {
+        return toJSONObject().toString();
     }
 }

@@ -1,4 +1,6 @@
-package app.model;
+package oop_lab_final_assignment.app.model;
+
+import org.json.JSONObject;
 
 public class Product {
     private String proId;
@@ -12,7 +14,8 @@ public class Product {
 
     public Product(String proId, String proModel, String proCategory,
                 String proName, double proCurrentPrice, double proRawPrice,
-                double proDiscount, int proLikesCount) {
+                double proDiscount, int proLikesCount)
+    {
         this.proId = proId;
         this.proModel = proModel;
         this.proCategory = proCategory;
@@ -29,7 +32,17 @@ public class Product {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        JSONObject json = new JSONObject();
+
+        json.put("pro_id", proId);
+        json.put("pro_model", proModel);
+        json.put("pro_category", proCategory);
+        json.put("pro_name", proName);
+        json.put("pro_current_price", proCurrentPrice);
+        json.put("pro_raw_price", proRawPrice);
+        json.put("pro_discount", proDiscount);
+        json.put("pro_likes_count", proLikesCount);
+
+        return json.toString();
     }
 }
