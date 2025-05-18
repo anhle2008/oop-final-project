@@ -1,13 +1,15 @@
 package src.model;
 
 public abstract class User {
-    private String userId;
-    private String userName;
-    private String userPassword;
-    private String userRegisterTime;
-    private String userRole;
+    protected String userId;
+    protected String userName;
+    protected String userPassword;
+    protected String userRegisterTime;
+    protected String userRole;
 
-    public User(String userId, String userName, String userPassword, String userRegisterTime, String userRole) {
+    // Constructor
+    public User(String userId, String userName, String userPassword,
+                String userRegisterTime, String userRole) {
         this.userId = userId;
         this.userName = userName;
         this.userPassword = userPassword;
@@ -15,13 +17,33 @@ public abstract class User {
         this.userRole = userRole;
     }
 
+    // Default constructor
     public User() {
-
+        this.userId = "u_0000000000";
+        this.userName = "default_user";
+        this.userPassword = "password";
+        this.userRegisterTime = "01-01-2025_00:00:00";
+        this.userRole = "customer";
     }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
+    }
+
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return String.format(
+                "{\"user_id\":\"%s\", \"user_name\":\"%s\", \"user_password\":\"%s\", \"user_register_time\":\"%s\", \"user_role\":\"%s\"}",
+                userId, userName, userPassword, userRegisterTime, userRole
+        );
     }
 }
