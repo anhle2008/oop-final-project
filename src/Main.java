@@ -1,181 +1,167 @@
-package src;
 
-import src.ui.IOInterface;
-import src.operation.UserOperation;
-import src.model.User;
-import src.model.Admin;
-import src.model.Customer;
 
-public class Main {
+    import UI.IOInterface;
+    import operation.*;
+    import model.*;
 
-    private static final IOInterface io = IOInterface.getInstance();
-    private static final UserOperation userOp = UserOperation.getInstance();
+    import java.util.List;
 
-    public static void main(String[] args) {
-        try {
-            mainLoop();
-        } catch (Exception e) {
-            io.printErrorMessage("Main", e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
-    private static void mainLoop() {
-        boolean running = true;
+    public class Main {
+        public static void main(String[] args) {
+            // Initialize operations
+            UserOperation userOp = UserOperation.getInstance();
+            CustomerOperation customerOp = CustomerOperation.getInstance();
+            AdminOperation adminOp = AdminOperation.getInstance();
+            ProductOperation productOp = ProductOperation.getInstance();
+            OrderOperation orderOp = OrderOperation.getInstance();
+            IOInterface io = IOInterface.getInstance();
 
-        while (running) {
-            io.mainMenu();
-            String[] input = io.getUserInput("", 1);
-            String choice = input[0];
+            // Register admin if not exists
+            adminOp.registerAdmin();
 
-            switch (choice) {
-                case "1": // Login
-                    handleLogin();
-                    break;
+            boolean running = true;
+            User currentUser = null;
 
-                case "2": // Register
-                    handleRegister();
-                    break;
+            while (running) {
+                if (currentUser == null) {
+                    // Show main menu
+                    io.mainMenu();
+                    String[] input = io.getUserInput("Enter your choice", 1);
+                    String choice = input[0];
 
-                case "3": // Quit
-                    io.printMessage("Exiting application. Goodbye!");
-                    running = false;
-                    break;
-
-                default:
-                    io.printErrorMessage("MainMenu", "Invalid choice. Please enter 1, 2, or 3.");
-            }
-        }
-    }
-
-    private static void handleLogin() {
-        String[] inputs = io.getUserInput("Enter username and password separated by space: ", 2);
-        String username = inputs[0];
-        String password = inputs[1];
-
-        if (username.isEmpty() || password.isEmpty()) {
-            io.printErrorMessage("Login", "Username or password cannot be empty.");
-            return;
-        }
-
-        User user = userOp.login(username, password);
-        if (user == null) {
-            io.printErrorMessage("Login", "Invalid username or password.");
-            return;
-        }
-
-        io.printMessage("Login successful. Welcome, " + username + "!");
-
-        if (user instanceof Admin) {
-            adminMenuLoop();
-        } else if (user instanceof Customer) {
-            customerMenuLoop((Customer) user);
-        } else {
-            io.printErrorMessage("Login", "Unknown user role.");
-        }
-    }
-
-    private static void handleRegister() {
-        io.printMessage("Register new user (admin cannot register).");
-
-        String[] inputs = io.getUserInput("Enter username and password separated by space: ", 2);
-        String username = inputs[0];
-        String password = inputs[1];
-
-        if (!userOp.validateUsername(username)) {
-            io.printErrorMessage("Register", "Invalid username. Must be at least 5 letters/underscores.");
-            return;
-        }
-
-        if (userOp.checkUsernameExist(username)) {
-            io.printErrorMessage("Register", "Username already exists.");
-            return;
-        }
-
-        if (!userOp.validatePassword(password)) {
-            io.printErrorMessage("Register", "Password must be at least 5 characters, contain letters and digits.");
-            return;
-        }
-
-        // Here you would implement user creation and saving to file
-        // Since you didn't provide that, just print success message for now
-        io.printMessage("Registration successful. You can now login.");
-    }
-
-    private static void adminMenuLoop() {
-        boolean loggedIn = true;
-        while (loggedIn) {
-            io.adminMenu();
-            String[] input = io.getUserInput("", 1);
-            String choice = input[0];
-
-            switch (choice) {
-                case "1":
-                    io.printMessage("Show products - Feature to implement");
-                    break;
-                case "2":
-                    io.printMessage("Add customers - Feature to implement");
-                    break;
-                case "3":
-                    io.printMessage("Show customers - Feature to implement");
-                    break;
-                case "4":
-                    io.printMessage("Show orders - Feature to implement");
-                    break;
-                case "5":
-                    io.printMessage("Generate test data - Feature to implement");
-                    break;
-                case "6":
-                    io.printMessage("Generate all statistical figures - Feature to implement");
-                    break;
-                case "7":
-                    io.printMessage("Delete all data - Feature to implement");
-                    break;
-                case "8":
-                    io.printMessage("Logging out...");
-                    loggedIn = false;
-                    break;
-                default:
-                    io.printErrorMessage("AdminMenu", "Invalid choice, please try again.");
-            }
-        }
-    }
-
-    private static void customerMenuLoop(Customer user) {
-        boolean loggedIn = true;
-        while (loggedIn) {
-            io.customerMenu();
-            String[] input = io.getUserInput("", 2); // for option + possible keyword
-            String choice = input[0];
-            String keyword = input.length > 1 ? input[1] : "";
-
-            switch (choice) {
-                case "1":
-                    io.printObject(user);
-                    break;
-                case "2":
-                    io.printMessage("Update profile - Feature to implement");
-                    break;
-                case "3":
-                    if (!keyword.isEmpty()) {
-                        io.printMessage("Show products with keyword '" + keyword + "' - Feature to implement");
-                    } else {
-                        io.printMessage("Show products - Feature to implement");
+                    switch (choice) {
+                        case "1": // Login
+                            String[] credentials = io.getUserInput("Enter username and password", 2);
+                            currentUser = userOp.login(credentials[0], credentials[1]);
+                            if (currentUser == null) {
+                                io.printErrorMessage("Login", "Invalid username or password");
+                            }
+                            break;
+                        case "2": // Register
+                            String[] regData = io.getUserInput("Enter username, password, email, mobile", 4);
+                            boolean success = customerOp.registerCustomer(
+                                    regData[0], regData[1], regData[2], regData[3]
+                            );
+                            if (success) {
+                                io.printMessage("Registration successful! Please login.");
+                            } else {
+                                io.printErrorMessage("Registration", "Failed to register. Check your input.");
+                            }
+                            break;
+                        case "3": // Quit
+                            running = false;
+                            break;
+                        default:
+                            io.printErrorMessage("Main Menu", "Invalid choice");
                     }
-                    break;
-                case "4":
-                    io.printMessage("Show history orders - Feature to implement");
-                    break;
-                case "5":
-                    io.printMessage("Generate all consumption figures - Feature to implement");
-                    break;
-                case "6":
-                    io.printMessage("Logging out...");
-                    loggedIn = false;
-                    break;
-                default:
-                    io.printErrorMessage("CustomerMenu", "Invalid choice, please try again.");
+                } else if (currentUser.getUserRole().equals("admin")) {
+                    // Admin menu
+                    io.adminMenu();
+                    String[] input = io.getUserInput("Enter your choice", 1);
+                    String choice = input[0];
+
+                    switch (choice) {
+                        case "1": // Show products
+                            ProductListResult result = productOp.getProductList(1);
+                            io.showList("admin", "Product", result.getProducts(),
+                                    result.getCurrentPage(), result.getTotalPages());
+                            break;
+                        case "2": // Add customers
+                            String[] customerData = io.getUserInput("Enter username, password, email, mobile", 4);
+                            boolean success = customerOp.registerCustomer(
+                                    customerData[0], customerData[1], customerData[2], customerData[3]
+                            );
+                            if (success) {
+                                io.printMessage("Customer added successfully!");
+                            } else {
+                                io.printErrorMessage("Add Customer", "Failed to add customer. Check your input.");
+                            }
+                            break;
+                        case "3": // Show customers
+                            CustomerListResult custResult = customerOp.getCustomerList(1);
+                            io.showList("admin", "Customer", custResult.getCustomers(),
+                                    custResult.getCurrentPage(), custResult.getTotalPages());
+                            break;
+                        case "4": // Show orders
+                            // In a real implementation, you might want to show all orders
+                            io.printMessage("Order list functionality not fully implemented");
+                            break;
+                        case "5": // Generate test data
+                            orderOp.generateTestOrderData();
+                            io.printMessage("Test data generated");
+                            break;
+                        case "6": // Generate all statistical figures
+                            productOp.generateCategoryFigure();
+                            productOp.generateDiscountFigure();
+                            productOp.generateLikesCountFigure();
+                            productOp.generateDiscountLikesCountFigure();
+                            orderOp.generateAllCustomersConsumptionFigure();
+                            orderOp.generateAllTop10BestSellersFigure();
+                            io.printMessage("All statistical figures generated");
+                            break;
+                        case "7": // Delete all data
+                            customerOp.deleteAllCustomers();
+                            productOp.deleteAllProducts();
+                            orderOp.deleteAllOrders();
+                            io.printMessage("All data deleted");
+                            break;
+                        case "8": // Logout
+                            currentUser = null;
+                            break;
+                        default:
+                            io.printErrorMessage("Admin Menu", "Invalid choice");
+                    }
+                } else {
+                    // Customer menu
+                    io.customerMenu();
+                    String[] input = io.getUserInput("Enter your choice", 2);
+                    String choice = input[0];
+                    String keyword = input.length > 1 ? input[1] : "";
+
+                    switch (choice) {
+                        case "1": // Show profile
+                            io.printObject(currentUser);
+                            break;
+                        case "2": // Update profile
+                            String[] updateData = io.getUserInput("Enter attribute (username/password/email/mobile) and new value", 2);
+                            boolean success = customerOp.updateProfile(
+                                    updateData[0], updateData[1], (Customer) currentUser
+                            );
+                            if (success) {
+                                io.printMessage("Profile updated successfully!");
+                            } else {
+                                io.printErrorMessage("Update Profile", "Failed to update profile. Check your input.");
+                            }
+                            break;
+                        case "3": // Show products
+                            if (!keyword.isEmpty()) {
+                                List<Product> products = productOp.getProductListByKeyword(keyword);
+                                io.showList("customer", "Product Search Results", products, 1, 1);
+                            } else {
+                                ProductListResult prodResult = productOp.getProductList(1);
+                                io.showList("customer", "Product", prodResult.getProducts(),
+                                        prodResult.getCurrentPage(), prodResult.getTotalPages());
+                            }
+                            break;
+                        case "4": // Show history orders
+                            OrderListResult orderResult = orderOp.getOrderList(currentUser.getUserId(), 1);
+                            io.showList("customer", "Order", orderResult.getOrders(),
+                                    orderResult.getCurrentPage(), orderResult.getTotalPages());
+                            break;
+                        case "5": // Generate all consumption figures
+                            orderOp.generateSingleCustomerConsumptionFigure(currentUser.getUserId());
+                            io.printMessage("Consumption figures generated");
+                            break;
+                        case "6": // Logout
+                            currentUser = null;
+                            break;
+                        default:
+                            io.printErrorMessage("Customer Menu", "Invalid choice");
+                    }
+                }
             }
+
+            io.printMessage("Thank you for using our system. Goodbye!");
         }
     }
-}

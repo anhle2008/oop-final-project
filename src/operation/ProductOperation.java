@@ -1,17 +1,20 @@
-package src.operation;
+package operation;
 
-import src.model.*;
+import model.Product;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.*;
+import java.util.stream.Collectors;
 
 public class ProductOperation {
     private static ProductOperation instance;
-    private final String productFile = "data/products.txt";
-    private final Random random = new Random();
+    private List<Product> products;
+    private static final String PRODUCTS_FILE = "data/products.txt";
 
-    private ProductOperation() {}
+    private ProductOperation() {
+        products = new ArrayList<>();
+        loadProductsFromFile();
+    }
 
     public static ProductOperation getInstance() {
         if (instance == null) {
@@ -20,105 +23,154 @@ public class ProductOperation {
         return instance;
     }
 
-    public String generateUniqueProductId() {
-        String id;
-        do {
-            id = "p_" + String.format("%010d", random.nextInt(1_000_000_000));
-        } while (productIdExists(id));
-        return id;
-    }
+    private void loadProductsFromFile() {
+        File file = new File(PRODUCTS_FILE);
+        File parentDir = file.getParentFile();
 
-    private boolean productIdExists(String productId) {
-        try (BufferedReader br = new BufferedReader(new FileReader(productFile))) {
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        if (!file.exists()) {
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("\"product_id\":\"" + productId + "\"")) return true;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    Product product = parseProduct(line);
+                    if (product != null) {
+                        products.add(product);
+                    }
+                }
             }
-        } catch (IOException ignored) {}
-        return false;
-    }
-
-    public boolean addProduct(Product product) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(productFile, true))) {
-            bw.write(product.toString());
-            bw.newLine();
-            return true;
         } catch (IOException e) {
-            return false;
+            System.err.println("Error loading products: " + e.getMessage());
         }
-    }
-
-    public boolean updateProduct(Product product) {
-        List<Product> products = getAllProducts();
-        for (int i = 0; i < products.size(); i++) {
-            if (products.get(i).getProductId().equals(product.getProductId())) {
-                products.set(i, product);
-                return saveAllProducts(products);
-            }
-        }
-        return false;
-    }
-
-    public boolean deleteProduct(String productId) {
-        List<Product> products = getAllProducts();
-        boolean found = false;
-        Iterator<Product> iter = products.iterator();
-        while (iter.hasNext()) {
-            Product p = iter.next();
-            if (p.getProductId().equals(productId)) {
-                iter.remove();
-                found = true;
-                break;
-            }
-        }
-        if (found) {
-            return saveAllProducts(products);
-        }
-        return false;
-    }
-
-    public List<Product> getAllProducts() {
-        List<Product> products = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(productFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                products.add(parseProduct(line));
-            }
-        } catch (IOException ignored) {}
-        return products;
     }
 
     private Product parseProduct(String line) {
-        String proId = extractField(line, "pro_id");
-        String proModel = extractField(line, "pro_model");
-        String proCategory = extractField(line, "pro_category");
-        String proName = extractField(line, "pro_name");
-        double proCurrentPrice = Double.parseDouble(extractField(line, "pro_current_price"));
-        double proRawPrice = Double.parseDouble(extractField(line, "pro_raw_price"));
-        double proDiscount = Double.parseDouble(extractField(line, "pro_discount"));
-        int proLikesCount = Integer.parseInt(extractField(line, "pro_likes_count"));
-
-        return new Product(proId, proModel, proCategory, proName, proCurrentPrice, proRawPrice, proDiscount, proLikesCount);
-    }
-
-    private boolean saveAllProducts(List<Product> products) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(productFile))) {
-            for (Product p : products) {
-                bw.write(p.toString());
-                bw.newLine();
+        try {
+            // Remove surrounding braces if they exist
+            line = line.trim();
+            if (line.startsWith("{") && line.endsWith("}")) {
+                line = line.substring(1, line.length() - 1);
             }
-            return true;
-        } catch (IOException e) {
-            return false;
+
+            Map<String, String> productMap = new HashMap<>();
+            // Split by comma only if not inside quotes
+            String[] pairs = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+            for (String pair : pairs) {
+                String[] kv = pair.split(":", 2);
+                if (kv.length == 2) {
+                    String key = kv[0].replaceAll("\"", "").trim();
+                    String value = kv[1].replaceAll("\"", "").trim();
+                    productMap.put(key, value);
+                }
+            }
+
+            return new Product(
+                    productMap.get("pro_id"),
+                    productMap.get("pro_model"),
+                    productMap.get("pro_category"),
+                    productMap.get("pro_name"),
+                    Double.parseDouble(productMap.get("pro_current_price")),
+                    Double.parseDouble(productMap.get("pro_raw_price")),
+                    Double.parseDouble(productMap.get("pro_discount")),
+                    Integer.parseInt(productMap.get("pro_likes_count"))
+            );
+        } catch (Exception e) {
+            System.err.println("Error parsing product line: " + line);
+            System.err.println("Exception: " + e.getMessage());
+            return null;
         }
     }
 
-    private String extractField(String jsonLine, String field) {
-        Pattern pattern = Pattern.compile("\"" + field + "\":\"(.*?)\"");
-        Matcher matcher = pattern.matcher(jsonLine);
-        if (matcher.find()) {
-            return matcher.group(1);
+
+    private void saveProductsToFile() {
+        File file = new File(PRODUCTS_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (Product product : products) {
+                writer.write(product.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving products: " + e.getMessage());
+        }
+    }
+
+    public ProductListResult getProductList(int pageNumber) {
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil((double) products.size() / pageSize);
+
+        if (pageNumber < 1 || pageNumber > totalPages) {
+            return new ProductListResult(new ArrayList<>(), 0, 0);
+        }
+
+        int fromIndex = (pageNumber - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, products.size());
+
+        return new ProductListResult(
+                products.subList(fromIndex, toIndex),
+                pageNumber,
+                totalPages
+        );
+    }
+
+    public boolean deleteProduct(String productId) {
+        Iterator<Product> iterator = products.iterator();
+        while (iterator.hasNext()) {
+            Product product = iterator.next();
+            if (product.getProId().equals(productId)) {
+                iterator.remove();
+                saveProductsToFile();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Product> getProductListByKeyword(String keyword) {
+        return products.stream()
+                .filter(p -> p.getProName().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public Product getProductById(String productId) {
+        for (Product product : products) {
+            if (product.getProId().equals(productId)) {
+                return product;
+            }
         }
         return null;
+    }
+
+    public void generateCategoryFigure() {
+        // Charting logic placeholder
+    }
+
+    public void generateDiscountFigure() {
+        // Charting logic placeholder
+    }
+
+    public void generateLikesCountFigure() {
+        // Charting logic placeholder
+    }
+
+    public void generateDiscountLikesCountFigure() {
+        // Charting logic placeholder
+    }
+
+    public void deleteAllProducts() {
+        products.clear();
+        saveProductsToFile();
+    }
+
+    public void addProduct(Product product) {
+        products.add(product);
+        saveProductsToFile();
     }
 }
