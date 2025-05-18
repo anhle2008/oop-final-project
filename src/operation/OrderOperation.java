@@ -100,7 +100,7 @@ public class OrderOperation {
 
     public boolean createAnOrder(String customerId, String productId, String createTime) {
         String orderId = generateUniqueOrderId();
-        String orderTime = createTime != null ? createTime : "01-01-2023_12:00:00"; // You can update this to current timestamp if needed
+        String orderTime = createTime != null ? createTime : "01-01-2023_12:00:00"; // Update to current timestamp if needed
 
         Order order = new Order(orderId, customerId, productId, orderTime);
         orders.add(order);
@@ -143,6 +143,25 @@ public class OrderOperation {
         );
     }
 
+    // New method for admin to get ALL orders paginated
+    public OrderListResult getAllOrders(int pageNumber) {
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil((double) orders.size() / pageSize);
+
+        if (pageNumber < 1 || pageNumber > totalPages) {
+            return new OrderListResult(new ArrayList<>(), 0, 0);
+        }
+
+        int fromIndex = (pageNumber - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, orders.size());
+
+        return new OrderListResult(
+                orders.subList(fromIndex, toIndex),
+                pageNumber,
+                totalPages
+        );
+    }
+
     public void deleteAllOrders() {
         orders.clear();
         saveOrdersToFile();
@@ -163,5 +182,4 @@ public class OrderOperation {
     public void generateAllTop10BestSellersFigure() {
         // Implementation would use a charting library
     }
-
 }

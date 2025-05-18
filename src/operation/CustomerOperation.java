@@ -4,6 +4,7 @@ import model.*;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 public class CustomerOperation {
@@ -29,13 +30,13 @@ public class CustomerOperation {
     }
 
     public boolean validateEmail(String userEmail) {
-        // Basic email validation
-        Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+        // Improved email validation: no trailing spaces, common pattern
+        Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
         return pattern.matcher(userEmail).matches();
     }
 
     public boolean validateMobile(String userMobile) {
-        // Exactly 10 digits, starting with 04 or 03
+        // Exactly 10 digits, starting with 03 or 04
         Pattern pattern = Pattern.compile("^(03|04)\\d{8}$");
         return pattern.matcher(userMobile).matches();
     }
@@ -44,28 +45,47 @@ public class CustomerOperation {
                                     String userEmail, String userMobile) {
         UserOperation userOp = UserOperation.getInstance();
 
+        // Trim inputs
+        userName = userName.trim();
+        userPassword = userPassword.trim();
+        userEmail = userEmail.trim();
+        userMobile = userMobile.trim();
+
         if (userOp.checkUsernameExist(userName)) {
+            System.out.println("DEBUG: Username already exists: " + userName);
             return false;
         }
 
-        if (!userOp.validateUsername(userName) ||
-                !userOp.validatePassword(userPassword) ||
-                !validateEmail(userEmail) ||
-                !validateMobile(userMobile)) {
+        if (!userOp.validateUsername(userName)) {
+            System.out.println("DEBUG: Invalid username: " + userName);
+            return false;
+        }
+        if (!userOp.validatePassword(userPassword)) {
+            System.out.println("DEBUG: Invalid password.");
+            return false;
+        }
+        if (!validateEmail(userEmail)) {
+            System.out.println("DEBUG: Invalid email: " + userEmail);
+            return false;
+        }
+        if (!validateMobile(userMobile)) {
+            System.out.println("DEBUG: Invalid mobile: " + userMobile);
             return false;
         }
 
         String userId = userOp.generateUniqueUserId();
-        String registerTime = "01-01-2023_12:00:00"; // Should be current time in real implementation
+        String registerTime = "01-01-2023_12:00:00"; // TODO: Replace with current time
         Customer customer = new Customer(userId, userName, userPassword,
                 registerTime, "customer",
                 userEmail, userMobile);
         customers.add(customer);
         userOp.addUser(customer); // Ensure it's saved to file
+        System.out.println("DEBUG: Customer registered successfully: " + userName);
         return true;
     }
 
     public boolean updateProfile(String attributeName, String value, Customer customerObject) {
+        value = value.trim();
         switch (attributeName.toLowerCase()) {
             case "username":
                 if (UserOperation.getInstance().validateUsername(value)) {
@@ -96,9 +116,11 @@ public class CustomerOperation {
     }
 
     public boolean deleteCustomer(String customerId) {
-        for (Customer customer : customers) {
+        Iterator<Customer> iterator = customers.iterator();
+        while (iterator.hasNext()) {
+            Customer customer = iterator.next();
             if (customer.getUserId().equals(customerId)) {
-                customers.remove(customer);
+                iterator.remove();
                 // In a real implementation, you would update the file here
                 return true;
             }
@@ -107,7 +129,6 @@ public class CustomerOperation {
     }
 
     public CustomerListResult getCustomerList(int pageNumber) {
-        // Simple pagination - in a real system you'd want more robust implementation
         int pageSize = 10;
         int totalPages = (int) Math.ceil((double) customers.size() / pageSize);
 
