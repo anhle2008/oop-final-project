@@ -20,7 +20,7 @@ public class Main {
         }
     }
 
-    private static void mainLoop() {1
+    private static void mainLoop() {
         boolean running = true;
 
         while (running) {
