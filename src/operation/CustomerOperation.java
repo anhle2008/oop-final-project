@@ -2,9 +2,8 @@ package operation;
 
 import model.*;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class CustomerOperation {
@@ -30,13 +29,11 @@ public class CustomerOperation {
     }
 
     public boolean validateEmail(String userEmail) {
-        // Improved email validation: no trailing spaces, common pattern
         Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
         return pattern.matcher(userEmail).matches();
     }
 
     public boolean validateMobile(String userMobile) {
-        // Exactly 10 digits, starting with 03 or 04
         Pattern pattern = Pattern.compile("^(03|04)\\d{8}$");
         return pattern.matcher(userMobile).matches();
     }
@@ -45,7 +42,6 @@ public class CustomerOperation {
                                     String userEmail, String userMobile) {
         UserOperation userOp = UserOperation.getInstance();
 
-        // Trim inputs
         userName = userName.trim();
         userPassword = userPassword.trim();
         userEmail = userEmail.trim();
@@ -74,56 +70,73 @@ public class CustomerOperation {
         }
 
         String userId = userOp.generateUniqueUserId();
-        String registerTime = "01-01-2023_12:00:00"; // TODO: Replace with current time
+        String registerTime = "01-01-2023_12:00:00"; // Replace with current time if needed
         Customer customer = new Customer(userId, userName, userPassword,
-                registerTime, "customer",
-                userEmail, userMobile);
+                registerTime, "customer", userEmail, userMobile);
         customers.add(customer);
-        userOp.addUser(customer); // Ensure it's saved to file
+        userOp.addUser(customer);
+        saveAllUsers(userOp.getAllUsers());
+
         System.out.println("DEBUG: Customer registered successfully: " + userName);
         return true;
     }
 
     public boolean updateProfile(String attributeName, String value, Customer customerObject) {
         value = value.trim();
+        boolean updated = false;
+        UserOperation userOp = UserOperation.getInstance();
+
         switch (attributeName.toLowerCase()) {
             case "username":
-                if (UserOperation.getInstance().validateUsername(value)) {
+                if (userOp.validateUsername(value)) {
                     customerObject.setUserName(value);
-                    return true;
+                    updated = true;
                 }
                 break;
             case "password":
-                if (UserOperation.getInstance().validatePassword(value)) {
+                if (userOp.validatePassword(value)) {
                     customerObject.setUserPassword(value);
-                    return true;
+                    updated = true;
                 }
                 break;
             case "email":
                 if (validateEmail(value)) {
                     customerObject.setUserEmail(value);
-                    return true;
+                    updated = true;
                 }
                 break;
             case "mobile":
                 if (validateMobile(value)) {
                     customerObject.setUserMobile(value);
-                    return true;
+                    updated = true;
                 }
                 break;
         }
-        return false;
+
+        if (updated) {
+            saveAllUsers(userOp.getAllUsers());
+        }
+        return updated;
     }
 
     public boolean deleteCustomer(String customerId) {
         Iterator<Customer> iterator = customers.iterator();
+        boolean removed = false;
+
         while (iterator.hasNext()) {
             Customer customer = iterator.next();
             if (customer.getUserId().equals(customerId)) {
                 iterator.remove();
-                // In a real implementation, you would update the file here
-                return true;
+                removed = true;
+                break;
             }
+        }
+
+        if (removed) {
+            List<User> allUsers = UserOperation.getInstance().getAllUsers();
+            allUsers.removeIf(u -> u.getUserId().equals(customerId));
+            saveAllUsers(allUsers);
+            return true;
         }
         return false;
     }
@@ -148,11 +161,30 @@ public class CustomerOperation {
 
     public void deleteAllCustomers() {
         customers.clear();
-        // In a real implementation, you would clear the file here
+        List<User> remainingUsers = new ArrayList<>();
+        for (User user : UserOperation.getInstance().getAllUsers()) {
+            if (!(user instanceof Customer)) {
+                remainingUsers.add(user);
+            }
+        }
+        saveAllUsers(remainingUsers);
     }
 
     // Helper method to add customer (for testing)
     public void addCustomer(Customer customer) {
         customers.add(customer);
+    }
+
+    // Helper method to save all users (admin + customers) to file
+    private void saveAllUsers(List<User> userList) {
+        File file = new File("data/users.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (User user : userList) {
+                writer.write(user.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving users: " + e.getMessage());
+        }
     }
 }

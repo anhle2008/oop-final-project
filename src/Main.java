@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Initialize operations
+        // Initialize operation instances using singleton pattern
         UserOperation userOp = UserOperation.getInstance();
         CustomerOperation customerOp = CustomerOperation.getInstance();
         AdminOperation adminOp = AdminOperation.getInstance();
@@ -17,15 +17,15 @@ public class Main {
         OrderOperation orderOp = OrderOperation.getInstance();
         IOInterface io = IOInterface.getInstance();
 
-        // Register admin if not exists
+        // Ensure that an admin user exists in the system
         adminOp.registerAdmin();
 
-        boolean running = true;
-        User currentUser = null;
+        boolean running = true; // Controls the main program loop
+        User currentUser = null; // Stores the currently logged-in user
 
         while (running) {
             if (currentUser == null) {
-                // Show main menu
+                // Show main menu when no user is logged in
                 io.mainMenu();
                 String[] input = io.getUserInput("Enter your choice", 1);
                 String choice = input[0];
@@ -38,7 +38,7 @@ public class Main {
                             io.printErrorMessage("Login", "Invalid username or password");
                         }
                         break;
-                    case "2": // Register
+                    case "2": // Register new customer
                         String[] regData = io.getUserInput("Enter username, password, email, mobile", 4);
                         boolean successReg = customerOp.registerCustomer(
                                 regData[0], regData[1], regData[2], regData[3]
@@ -49,25 +49,25 @@ public class Main {
                             io.printErrorMessage("Registration", "Failed to register. Check your input.");
                         }
                         break;
-                    case "3": // Quit
+                    case "3": // Quit program
                         running = false;
                         break;
                     default:
                         io.printErrorMessage("Main Menu", "Invalid choice");
                 }
             } else if (currentUser.getUserRole().equals("admin")) {
-                // Admin menu
+                // Admin-specific menu
                 io.adminMenu();
                 String[] input = io.getUserInput("Enter your choice", 1);
                 String choice = input[0];
 
                 switch (choice) {
-                    case "1": // Show products
+                    case "1": // Show product list
                         ProductListResult prodResult = productOp.getProductList(1);
                         io.showList("admin", "Product", prodResult.getProducts(),
                                 prodResult.getCurrentPage(), prodResult.getTotalPages());
                         break;
-                    case "2": // Add customers
+                    case "2": // Add a new customer
                         String[] customerData = io.getUserInput("Enter username, password, email, mobile", 4);
                         boolean successAddCust = customerOp.registerCustomer(
                                 customerData[0], customerData[1], customerData[2], customerData[3]
@@ -78,15 +78,15 @@ public class Main {
                             io.printErrorMessage("Add Customer", "Failed to add customer. Check your input.");
                         }
                         break;
-                    case "3": // Show customers
+                    case "3": // Show customer list
                         CustomerListResult custResult = customerOp.getCustomerList(1);
                         io.showList("admin", "Customer", custResult.getCustomers(),
                                 custResult.getCurrentPage(), custResult.getTotalPages());
                         break;
-                    case "4": // Show orders — now calls the real method
+                    case "4": // Show orders using admin operation
                         adminOp.showOrders(scanner);
                         break;
-                    case "5": // Generate test data
+                    case "5": // Generate test orders
                         orderOp.generateTestOrderData();
                         io.printMessage("Test data generated");
                         break;
@@ -99,7 +99,7 @@ public class Main {
                         orderOp.generateAllTop10BestSellersFigure();
                         io.printMessage("All statistical figures generated");
                         break;
-                    case "7": // Delete all data
+                    case "7": // Delete all data from system
                         customerOp.deleteAllCustomers();
                         productOp.deleteAllProducts();
                         orderOp.deleteAllOrders();
@@ -112,17 +112,17 @@ public class Main {
                         io.printErrorMessage("Admin Menu", "Invalid choice");
                 }
             } else {
-                // Customer menu
+                // Customer-specific menu
                 io.customerMenu();
                 String[] input = io.getUserInput("Enter your choice", 2);
                 String choice = input[0];
                 String keyword = input.length > 1 ? input[1] : "";
 
                 switch (choice) {
-                    case "1": // Show profile
+                    case "1": // Show current user's profile
                         io.printObject(currentUser);
                         break;
-                    case "2": // Update profile
+                    case "2": // Update profile information
                         String[] updateData = io.getUserInput("Enter attribute (username/password/email/mobile) and new value", 2);
                         boolean successUpdate = customerOp.updateProfile(
                                 updateData[0], updateData[1], (Customer) currentUser
@@ -133,7 +133,7 @@ public class Main {
                             io.printErrorMessage("Update Profile", "Failed to update profile. Check your input.");
                         }
                         break;
-                    case "3": // Show products
+                    case "3": // Show products, optionally filter by keyword
                         if (!keyword.isEmpty()) {
                             List<Product> products = productOp.getProductListByKeyword(keyword);
                             io.showList("customer", "Product Search Results", products, 1, 1);
@@ -143,12 +143,12 @@ public class Main {
                                     prodResultCust.getCurrentPage(), prodResultCust.getTotalPages());
                         }
                         break;
-                    case "4": // Show orders
-                        OrderListResult allOrdersResult = orderOp.getAllOrders(1); // get page 1
+                    case "4": // Show all orders made by the customer
+                        OrderListResult allOrdersResult = orderOp.getAllOrders(1);
                         io.showList("admin", "All Orders", allOrdersResult.getOrders(),
                                 allOrdersResult.getCurrentPage(), allOrdersResult.getTotalPages());
                         break;
-                    case "5": // Generate all consumption figures
+                    case "5": // Generate consumption figure for this customer
                         orderOp.generateSingleCustomerConsumptionFigure(currentUser.getUserId());
                         io.printMessage("Consumption figures generated");
                         break;
@@ -161,6 +161,7 @@ public class Main {
             }
         }
 
+        // Final message on exit
         io.printMessage("Thank you for using our system. Goodbye!");
         scanner.close();
     }
