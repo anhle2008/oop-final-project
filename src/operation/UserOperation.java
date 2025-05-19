@@ -163,6 +163,50 @@ public class UserOperation {
         return "u_" + System.currentTimeMillis() + "_" + ThreadLocalRandom.current().nextInt(1000);
     }
 
+    public String encryptPassword(String userPassword) {
+        String allChars = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789";
+
+        // Encrypted password with initial marker
+        String encrypted = "^^";
+
+        String randString = "";
+
+        int encryptedLength = userPassword.length() * 2;
+
+        Random random = new Random();
+
+        // Generate a random string
+        for (int i = 0; i < encryptedLength; i++) {
+            int index = random.nextInt(allChars.length());
+
+            randString += allChars.charAt(index);
+        }
+
+        // Encrypt password
+        for (int i = 0; i < userPassword.length(); i++) {
+            encrypted += randString.charAt(i * 2);
+            encrypted += randString.charAt(i * 2 + 1);
+            encrypted += userPassword.charAt(i);
+        }
+
+        // Ending marker for encrypted password
+        encrypted += "$$";
+
+        return encrypted;
+    }
+
+    public String decryptPassword(String encryptedPassword) {
+        String encryptedNoMarker = encryptedPassword.substring(2, encryptedPassword.length() - 2);
+        String decrypted = "";
+
+        // Decrypt the password
+        for (int i = 2; i < encryptedNoMarker.length(); i += 3) {
+            decrypted += encryptedNoMarker.charAt(i);
+        }
+
+        return decrypted;
+    }
+
     /**
      * Check if a username already exists.
      */

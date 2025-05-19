@@ -6,6 +6,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+
 public class CustomerOperation {
     private static CustomerOperation instance;
     private List<Customer> customers;
@@ -70,7 +73,11 @@ public class CustomerOperation {
         }
 
         String userId = userOp.generateUniqueUserId();
-        String registerTime = "01-01-2023_12:00:00"; // Replace with current time if needed
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy_hh:mm:ss");
+        String registerTime = currentTime.format(timeFormat);
+
         Customer customer = new Customer(userId, userName, userPassword,
                 registerTime, "customer", userEmail, userMobile);
         customers.add(customer);
