@@ -9,6 +9,7 @@ public abstract class User {
     protected String userRegisterTime;
     protected String userRole;
 
+    //constructor
     public User(String userId, String userName, String userPassword,
                 String userRegisterTime, String userRole) {
         this.userId = userId;
@@ -18,6 +19,7 @@ public abstract class User {
         this.userRole = userRole;
     }
 
+    //default constructor (default role is customer)
     public User() {
         this("", "", "", "", "customer");
     }
@@ -34,6 +36,8 @@ public abstract class User {
     public String getUserRole() { return userRole; }
     public void setUserRole(String userRole) { this.userRole = userRole; }
 
+
+    //return json string
     @Override
     public String toString() {
         return String.format("{\"user_id\":\"%s\", \"user_name\":\"%s\", \"user_password\":\"%s\", " +
@@ -41,6 +45,7 @@ public abstract class User {
                 userId, userName, userPassword, userRegisterTime, userRole);
     }
 
+    //checking if input match all field
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,6 +58,7 @@ public abstract class User {
                 Objects.equals(userRole, user.userRole);
     }
 
+    //Store objects and Find objects in txt file
     @Override
     public int hashCode() {
         return Objects.hash(userId, userName, userPassword, userRegisterTime, userRole);

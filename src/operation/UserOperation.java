@@ -124,6 +124,9 @@ public class UserOperation {
         return "u_" + System.currentTimeMillis() + "_" + ThreadLocalRandom.current().nextInt(1000);
     }
 
+
+
+
     public boolean checkUsernameExist(String userName) {
         if (userName == null) {
             return false;
