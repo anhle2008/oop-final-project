@@ -30,7 +30,7 @@ public class AdminOperation {
     }
 
     /**
-     * Loads admins from a CSV-formatted file.
+     * Loads admins from a  file.
      * Each line in the file should contain:
      * userId,userName,password,registerTime,role
      * Example line: u_0000000001,admin,admin123,01-01-2023_00:00:00,admin
