@@ -239,7 +239,7 @@ public class UserOperation {
             return null;
         }
         return users.stream()
-                .filter(u -> userName.equals(u.getUserName()) && userPassword.equals(u.getUserPassword()))
+                .filter(u -> userName.equals(u.getUserName()) && userPassword.equals(decryptPassword(u.getUserPassword())))
                 .findFirst()
                 .orElse(null);
     }

@@ -78,7 +78,7 @@ public class CustomerOperation {
         DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy_hh:mm:ss");
         String registerTime = currentTime.format(timeFormat);
 
-        Customer customer = new Customer(userId, userName, userPassword,
+        Customer customer = new Customer(userId, userName, userOp.encryptPassword(userPassword),
                 registerTime, "customer", userEmail, userMobile);
         customers.add(customer);
         userOp.addUser(customer);
@@ -102,7 +102,7 @@ public class CustomerOperation {
                 break;
             case "password":
                 if (userOp.validatePassword(value)) {
-                    customerObject.setUserPassword(value);
+                    customerObject.setUserPassword(userOp.encryptPassword(value));
                     updated = true;
                 }
                 break;
