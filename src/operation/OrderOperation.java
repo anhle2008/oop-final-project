@@ -247,32 +247,22 @@ public class OrderOperation {
 
     // Placeholder methods for generating test data and consumption figures
 
-    /**
-     * Generates test order data. (Implementation pending)
-     */
+
     public void generateTestOrderData() {
         // Implementation would create test data
     }
 
-    /**
-     * Generates a consumption figure chart for a single customer. (Implementation pending)
-     *
-     * @param customerId ID of the customer
-     */
+
     public void generateSingleCustomerConsumptionFigure(String customerId) {
         // Implementation would use a charting library
     }
 
-    /**
-     * Generates a consumption figure chart for all customers. (Implementation pending)
-     */
+
     public void generateAllCustomersConsumptionFigure() {
         // Implementation would use a charting library
     }
 
-    /**
-     * Generates a top 10 best sellers chart. (Implementation pending)
-     */
+
     public void generateAllTop10BestSellersFigure() {
         // Implementation would use a charting library
     }
