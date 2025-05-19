@@ -23,14 +23,15 @@ public class UserOperation {
 
     /**
      * Private constructor initializes users list and loads users from file.
+     * Loads users from file when this class is created.
      */
     private UserOperation() {
         users = new ArrayList<>();
         loadUsersFromFile();
     }
 
-    /**
-     * Provides singleton instance of UserOperation.
+    /*
+     Only one UserOperation object will exist
      */
     public static UserOperation getInstance() {
         if (instance == null) {
@@ -78,23 +79,21 @@ public class UserOperation {
         }
     }
 
-    /**
-     * Parse a user JSON-like string and instantiate corresponding User object.
-     * Returns null if the line does not represent a user.
-     */
+
     private User parseUser(String line) {
-        // Skip lines containing order or product data
+    //Check if this line is about orders or products
         if (line.contains("order_id") || line.contains("pro_id")) {
             System.err.println("Skipping non-user record in users file: " + line);
             return null;
         }
-
+        //Turn the line into a list of keys and values
         Map<String, String> userMap = createUserMap(line);
         if (userMap.isEmpty()) {
             return null;
         }
 
         try {
+            //Take out pieces of user info by name
             String userId = userMap.get("user_id");
             String userName = userMap.get("user_name");
             String password = userMap.get("user_password");
