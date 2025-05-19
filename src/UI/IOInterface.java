@@ -24,9 +24,6 @@ public class IOInterface {
 
     /**
      * Prompts the user for input with a given message and returns the input as an array of strings.
-     * @param message Message to prompt the user
-     * @param numOfArgs Expected number of arguments in the input
-     * @return Array of strings containing user input arguments
      */
     public String[] getUserInput(String message, int numOfArgs) {
         System.out.print(message + ": ");
@@ -78,7 +75,7 @@ public class IOInterface {
     }
 
     /**
-     * Displays a list of items with pagination support.
+     * Displays a list of items .
      * @param userRole Role of the user viewing the list
      * @param listType Type of list (e.g., Products, Orders)
      * @param objectList List of objects to display
@@ -100,8 +97,7 @@ public class IOInterface {
 
     /**
      * Displays an error message with context of the source.
-     * @param errorSource The component or method that caused the error
-     * @param errorMessage The descriptive error message
+
      */
     public void printErrorMessage(String errorSource, String errorMessage) {
         System.out.printf("\nERROR [%s]: %s\n", errorSource, errorMessage);
