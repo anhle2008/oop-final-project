@@ -178,17 +178,7 @@ public class ProductOperation {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Find a product by its ID.
-     */
-    public Product getProductById(String productId) {
-        for (Product product : products) {
-            if (product.getProId().equals(productId)) {
-                return product;
-            }
-        }
-        return null;
-    }
+
 
     // Placeholder methods for generating various charts based on product data
     public void generateCategoryFigure() {
