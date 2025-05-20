@@ -132,10 +132,7 @@ public class ProductOperation {
     }
 
     /**
-     * Get a paginated list of products.
-     *
-     * @param pageNumber the page number to retrieve (1-based)
-     * @return ProductListResult containing products and pagination info
+     * Get  list of products.
      */
     public ProductListResult getProductList(int pageNumber) {
         int pageSize = 10;  // Number of products per page
@@ -157,9 +154,6 @@ public class ProductOperation {
 
     /**
      * Delete a product by its ID.
-     *
-     * @param productId the ID of the product to delete
-     * @return true if deleted, false if not found
      */
     public boolean deleteProduct(String productId) {
         Iterator<Product> iterator = products.iterator();
@@ -175,10 +169,8 @@ public class ProductOperation {
     }
 
     /**
-     * Search products by a keyword in their name (case-insensitive).
-     *
-     * @param keyword the search keyword
-     * @return list of matching products
+     * Search products by a keyword in their name
+
      */
     public List<Product> getProductListByKeyword(String keyword) {
         return products.stream()
@@ -188,9 +180,6 @@ public class ProductOperation {
 
     /**
      * Find a product by its ID.
-     *
-     * @param productId the product ID to search
-     * @return Product if found, otherwise null
      */
     public Product getProductById(String productId) {
         for (Product product : products) {
