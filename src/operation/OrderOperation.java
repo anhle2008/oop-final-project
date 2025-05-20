@@ -34,8 +34,7 @@ public class OrderOperation {
     /**
      * Returns the singleton instance of OrderOperation.
      * Creates the instance if it does not exist.
-     *
-     * @return singleton instance of OrderOperation
+
      */
     public static OrderOperation getInstance() {
         if (instance == null) {
@@ -46,7 +45,7 @@ public class OrderOperation {
 
     /**
      * Loads orders from the specified orders file.
-     * If file or directory doesn't exist, handles creation or skips loading.
+
      */
     private void loadOrdersFromFile() {
         File file = new File(ORDERS_FILE);
@@ -86,8 +85,7 @@ public class OrderOperation {
     /**
      * Parses a single order from a JSON-like string representation.
      *
-     * @param orderString JSON-like string representing an order
-     * @return Order object if parsing successful; otherwise, null
+
      */
     private Order parseOrder(String orderString) {
         Map<String, String> map = new HashMap<>();
@@ -121,7 +119,7 @@ public class OrderOperation {
 
     /**
      * Saves all current orders to the orders file.
-     * Assumes Order.toString() returns JSON-like formatted string.
+
      */
     private void saveOrdersToFile() {
         File file = new File(ORDERS_FILE);
@@ -137,8 +135,6 @@ public class OrderOperation {
 
     /**
      * Generates a unique order ID using a prefix and a zero-padded random number.
-     *
-     * @return unique order ID string
      */
     public String generateUniqueOrderId() {
         return "o_" + String.format("%05d", (int)(Math.random() * 100000));
@@ -146,11 +142,6 @@ public class OrderOperation {
 
     /**
      * Creates a new order and saves it.
-     *
-     * @param customerId ID of the customer placing the order
-     * @param productId  ID of the product ordered
-     * @param createTime Order creation time (if null, defaults to a fixed timestamp)
-     * @return true if order created successfully
      */
     public boolean createAnOrder(String customerId, String productId, String createTime) {
         String orderId = generateUniqueOrderId();
@@ -165,9 +156,6 @@ public class OrderOperation {
 
     /**
      * Deletes an order by order ID.
-     *
-     * @param orderId ID of the order to delete
-     * @return true if the order was found and deleted, false otherwise
      */
     public boolean deleteOrder(String orderId) {
         Iterator<Order> iterator = orders.iterator();
@@ -184,10 +172,6 @@ public class OrderOperation {
 
     /**
      * Retrieves a paginated list of orders for a specific customer.
-     *
-     * @param customerId ID of the customer whose orders to fetch
-     * @param pageNumber Requested page number (1-based)
-     * @return paginated OrderListResult containing orders and page info
      */
     public OrderListResult getOrderList(String customerId, int pageNumber) {
         List<Order> customerOrders = orders.stream()
@@ -214,9 +198,6 @@ public class OrderOperation {
 
     /**
      * Retrieves a paginated list of all orders (for admin use).
-     *
-     * @param pageNumber Requested page number (1-based)
-     * @return paginated OrderListResult containing all orders and page info
      */
     public OrderListResult getAllOrders(int pageNumber) {
         int pageSize = 10;
