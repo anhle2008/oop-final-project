@@ -133,68 +133,6 @@ public class OrderOperation {
         }
     }
 
-    /**
-     * Generates a unique order ID using a prefix and a zero-padded random number.
-     */
-    public String generateUniqueOrderId() {
-        return "o_" + String.format("%05d", (int)(Math.random() * 100000));
-    }
-
-    /**
-     * Creates a new order and saves it.
-     */
-    public boolean createAnOrder(String customerId, String productId, String createTime) {
-        String orderId = generateUniqueOrderId();
-        // Use provided creation time or default fixed time (consider updating to current timestamp)
-        String orderTime = createTime != null ? createTime : "01-01-2023_12:00:00";
-
-        Order order = new Order(orderId, customerId, productId, orderTime);
-        orders.add(order);
-        saveOrdersToFile();
-        return true;
-    }
-
-    /**
-     * Deletes an order by order ID.
-     */
-    public boolean deleteOrder(String orderId) {
-        Iterator<Order> iterator = orders.iterator();
-        while (iterator.hasNext()) {
-            Order order = iterator.next();
-            if (order.getOrderId().equals(orderId)) {
-                iterator.remove();
-                saveOrdersToFile();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Retrieves a paginated list of orders for a specific customer.
-     */
-    public OrderListResult getOrderList(String customerId, int pageNumber) {
-        List<Order> customerOrders = orders.stream()
-                .filter(o -> o.getUserId().equals(customerId))
-                .collect(Collectors.toList());
-
-        int pageSize = 10;
-        int totalPages = (int) Math.ceil((double) customerOrders.size() / pageSize);
-
-        // Return empty result if page number is invalid
-        if (pageNumber < 1 || pageNumber > totalPages) {
-            return new OrderListResult(new ArrayList<>(), 0, 0);
-        }
-
-        int fromIndex = (pageNumber - 1) * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, customerOrders.size());
-
-        return new OrderListResult(
-                customerOrders.subList(fromIndex, toIndex),
-                pageNumber,
-                totalPages
-        );
-    }
 
     /**
      * Retrieves a paginated list of all orders (for admin use).

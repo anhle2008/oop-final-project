@@ -152,32 +152,15 @@ public class ProductOperation {
         );
     }
 
-    /**
-     * Delete a product by its ID.
-     */
-    public boolean deleteProduct(String productId) {
-        Iterator<Product> iterator = products.iterator();
-        while (iterator.hasNext()) {
-            Product product = iterator.next();
-            if (product.getProId().equals(productId)) {
-                iterator.remove();
-                saveProductsToFile();
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Search products by a keyword in their name
-
      */
     public List<Product> getProductListByKeyword(String keyword) {
         return products.stream()
                 .filter(p -> p.getProName().toLowerCase().contains(keyword.toLowerCase()))
                 .collect(Collectors.toList());
     }
-
 
 
     // Placeholder methods for generating various charts based on product data
@@ -205,13 +188,4 @@ public class ProductOperation {
         saveProductsToFile();
     }
 
-    /**
-     * Add a new product and save the updated list to the file.
-     *
-     * @param product the Product object to add
-     */
-    public void addProduct(Product product) {
-        products.add(product);
-        saveProductsToFile();
-    }
 }

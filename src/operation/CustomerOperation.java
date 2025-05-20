@@ -126,27 +126,7 @@ public class CustomerOperation {
         return updated;
     }
 
-    public boolean deleteCustomer(String customerId) {
-        Iterator<Customer> iterator = customers.iterator();
-        boolean removed = false;
 
-        while (iterator.hasNext()) {
-            Customer customer = iterator.next();
-            if (customer.getUserId().equals(customerId)) {
-                iterator.remove();
-                removed = true;
-                break;
-            }
-        }
-
-        if (removed) {
-            List<User> allUsers = UserOperation.getInstance().getAllUsers();
-            allUsers.removeIf(u -> u.getUserId().equals(customerId));
-            saveAllUsers(allUsers);
-            return true;
-        }
-        return false;
-    }
 
     public CustomerListResult getCustomerList(int pageNumber) {
         int pageSize = 10;
@@ -177,10 +157,6 @@ public class CustomerOperation {
         saveAllUsers(remainingUsers);
     }
 
-    // Helper method to add customer (for testing)
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
-    }
 
     // Helper method to save all users (admin + customers) to file
     private void saveAllUsers(List<User> userList) {
